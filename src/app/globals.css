@@ -1,0 +1,83 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-bg-primary: #ffffff;
+    --color-bg-secondary: #f8fafc;
+    --color-text-primary: #0f172a;
+    --color-text-secondary: #475569;
+    --color-border: #e2e8f0;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-white text-slate-900 antialiased;
+  }
+}
+
+@layer components {
+  .prose-news {
+    @apply max-w-none leading-relaxed text-slate-700;
+  }
+
+  .prose-news h2 {
+    @apply mb-4 mt-8 text-2xl font-bold text-slate-900;
+  }
+
+  .prose-news h3 {
+    @apply mb-3 mt-6 text-xl font-semibold text-slate-900;
+  }
+
+  .prose-news h4 {
+    @apply mb-2 mt-4 text-lg font-semibold text-slate-900;
+  }
+
+  .prose-news p {
+    @apply mb-4 leading-7;
+  }
+
+  .prose-news img {
+    @apply my-6 rounded-lg;
+  }
+
+  .prose-news blockquote {
+    @apply my-4 border-l-4 border-brand-500 pl-4 italic text-slate-600;
+  }
+
+  .prose-news ul {
+    @apply mb-4 list-disc pl-6;
+  }
+
+  .prose-news ol {
+    @apply mb-4 list-decimal pl-6;
+  }
+
+  .prose-news a {
+    @apply text-brand-600 underline hover:text-brand-800;
+  }
+
+  .prose-news table {
+    @apply mb-6 w-full border-collapse;
+  }
+
+  .prose-news th {
+    @apply border border-slate-300 bg-slate-50 px-4 py-2 text-left font-semibold;
+  }
+
+  .prose-news td {
+    @apply border border-slate-300 px-4 py-2;
+  }
+
+  .prose-news code {
+    @apply rounded bg-slate-100 px-1.5 py-0.5 font-mono text-sm text-slate-800;
+  }
+
+  .prose-news pre {
+    @apply my-4 overflow-x-auto rounded-lg bg-slate-900 p-4 text-sm text-slate-100;
+  }
+}

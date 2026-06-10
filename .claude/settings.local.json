@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install *)",
+      "Bash(npm config *)",
+      "Bash(git init *)",
+      "Bash(npx husky *)",
+      "Bash(npm run *)",
+      "Bash(supabase --version)",
+      "Bash(npx supabase *)",
+      "Bash(node -e \"const pg = require\\('pg'\\); console.log\\('pg module available'\\)\")",
+      "Bash(node scripts/run-migrations.mjs)",
+      "Bash(npx tsc *)",
+      "Bash(git add *)",
+      "Skill(claude-hud:setup)",
+      "Bash(node -e ' *)"
+    ]
+  }
+}
