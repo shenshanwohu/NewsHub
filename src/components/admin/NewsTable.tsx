@@ -152,7 +152,7 @@ export function NewsTable({
                 <tr key={item.id} className="hover:bg-slate-50">
                   <td className="max-w-xs px-4 py-3">
                     <Link
-                      href={`/admin/news/${item.id}`}
+                      href={`/admin/news/${item.id}/edit`}
                       className="font-medium text-slate-900 hover:text-brand-600"
                     >
                       <span className="line-clamp-1">{item.title}</span>
@@ -191,7 +191,7 @@ export function NewsTable({
                   <td className="whitespace-nowrap px-4 py-3">
                     <div className="flex items-center gap-2">
                       <Link
-                        href={`/admin/news/${item.id}`}
+                        href={`/admin/news/${item.id}/edit`}
                         className="rounded px-2 py-1 text-xs font-medium text-brand-600 hover:bg-brand-50"
                       >
                         编辑

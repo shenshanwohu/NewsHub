@@ -27,8 +27,8 @@ export function LoginForm() {
       const result = await login(email, password);
 
       if (result.success) {
-        router.push(redirectTo);
-        router.refresh();
+        // 全页刷新以确保 session cookie 被浏览器正确携带
+        window.location.href = redirectTo;
       } else {
         setError(result.error);
         setIsLoading(false);

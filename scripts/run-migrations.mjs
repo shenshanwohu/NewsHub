@@ -25,6 +25,7 @@ const MIGRATION_ORDER = [
   '20260606000009_rls.sql',
   '20260606000010_storage.sql',
   '20260606000011_view_counter.sql',
+  '20260606000012_fix_rls_recursion.sql',
 ];
 
 /**
