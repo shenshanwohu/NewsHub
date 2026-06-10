@@ -13,10 +13,6 @@
     "typecheck": "tsc --noEmit",
     "prepare": "husky"
   },
-  "overrides": {
-    "@tiptap/core": "3.25.0",
-    "@tiptap/pm": "3.25.0"
-  },
   "lint-staged": {
     "*.{ts,tsx}": [
       "eslint --fix",
