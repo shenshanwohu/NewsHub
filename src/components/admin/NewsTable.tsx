@@ -4,7 +4,7 @@ import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { FeaturedToggle } from './FeaturedToggle';
-import { updateNewsStatus } from '@/lib/actions/admin-news';
+import { updateNewsStatus, deleteNews } from '@/lib/actions/admin-news';
 import type { AdminNewsItem, NewsCategory } from '@/lib/actions/news';
 
 // ──────────────────────────────────────────────
@@ -80,6 +80,20 @@ export function NewsTable({
     [router],
   );
 
+  const handleDelete = useCallback(
+    async (newsId: string, title: string) => {
+      if (!confirm(`确定要删除「${title}」吗？此操作不可撤销。`)) return;
+      const result = await deleteNews(newsId);
+      if (!result.success) {
+        alert(result.error);
+        return;
+      }
+      setItems((prev) => prev.filter((n) => n.id !== newsId));
+      router.refresh();
+    },
+    [router],
+  );
+
   const handleFeaturedToggle = useCallback(
     (newsId: string, newValue: boolean) => {
       setItems((prev) =>
@@ -128,16 +142,28 @@ export function NewsTable({
         <table className="w-full text-left text-sm">
           <thead className="border-b border-slate-200 bg-slate-50">
             <tr>
-              <th className="px-4 py-3 font-medium text-slate-600">标题</th>
-              <th className="px-4 py-3 font-medium text-slate-600">分类</th>
-              <th className="px-4 py-3 font-medium text-slate-600">状态</th>
-              <th className="px-4 py-3 font-medium text-slate-600">作者</th>
-              <th className="px-4 py-3 font-medium text-slate-600">时间</th>
-              <th className="px-4 py-3 font-medium text-slate-600">置顶</th>
+              <th className="border-r border-slate-200 px-4 py-3 font-medium text-slate-600">
+                标题
+              </th>
+              <th className="border-r border-slate-200 px-4 py-3 font-medium text-slate-600">
+                分类
+              </th>
+              <th className="border-r border-slate-200 px-4 py-3 font-medium text-slate-600">
+                状态
+              </th>
+              <th className="border-r border-slate-200 px-4 py-3 font-medium text-slate-600">
+                作者
+              </th>
+              <th className="border-r border-slate-200 px-4 py-3 font-medium text-slate-600">
+                时间
+              </th>
+              <th className="border-r border-slate-200 px-4 py-3 font-medium text-slate-600">
+                置顶
+              </th>
               <th className="px-4 py-3 font-medium text-slate-600">操作</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody>
             {items.length === 0 ? (
               <tr>
                 <td
@@ -149,8 +175,11 @@ export function NewsTable({
               </tr>
             ) : (
               items.map((item) => (
-                <tr key={item.id} className="hover:bg-slate-50">
-                  <td className="max-w-xs px-4 py-3">
+                <tr
+                  key={item.id}
+                  className="border-b border-slate-200 last:border-b-0 hover:bg-slate-100"
+                >
+                  <td className="max-w-xs border-r border-slate-200 px-4 py-3">
                     <Link
                       href={`/admin/news/${item.id}/edit`}
                       className="font-medium text-slate-900 hover:text-brand-600"
@@ -158,7 +187,7 @@ export function NewsTable({
                       <span className="line-clamp-1">{item.title}</span>
                     </Link>
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="border-r border-slate-200 px-4 py-3">
                     <div className="flex flex-wrap gap-1">
                       {item.categories.map((cat) => (
                         <span
@@ -170,18 +199,18 @@ export function NewsTable({
                       ))}
                     </div>
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="border-r border-slate-200 px-4 py-3">
                     <StatusBadge status={item.status} />
                   </td>
-                  <td className="px-4 py-3 text-slate-500">
+                  <td className="border-r border-slate-200 px-4 py-3 text-slate-500">
                     {item.author_name ?? '—'}
                   </td>
-                  <td className="whitespace-nowrap px-4 py-3 text-slate-500">
+                  <td className="whitespace-nowrap border-r border-slate-200 px-4 py-3 text-slate-500">
                     {item.published_at
                       ? formatDate(item.published_at)
                       : formatDate(item.created_at)}
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="border-r border-slate-200 px-4 py-3">
                     <FeaturedToggle
                       newsId={item.id}
                       isFeatured={item.is_featured}
@@ -192,29 +221,35 @@ export function NewsTable({
                     <div className="flex items-center gap-2">
                       <Link
                         href={`/admin/news/${item.id}/edit`}
-                        className="rounded px-2 py-1 text-xs font-medium text-brand-600 hover:bg-brand-50"
+                        className="rounded-lg border border-brand-300 bg-white px-3 py-1.5 text-xs font-medium text-brand-600 hover:bg-brand-50"
                       >
                         编辑
                       </Link>
                       <Link
                         href={`/admin/news/${item.id}/preview`}
                         target="_blank"
-                        className="rounded px-2 py-1 text-xs font-medium text-slate-500 hover:bg-slate-50"
+                        className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50"
                       >
                         预览
                       </Link>
                       {item.status !== 'archived' && (
                         <button
                           onClick={() => handlePublish(item.id, item.status)}
-                          className={`rounded px-2 py-1 text-xs font-medium ${
+                          className={`rounded-lg border px-3 py-1.5 text-xs font-medium ${
                             item.status === 'published'
-                              ? 'text-amber-600 hover:bg-amber-50'
-                              : 'text-green-600 hover:bg-green-50'
+                              ? 'border-amber-300 bg-white text-amber-600 hover:bg-amber-50'
+                              : 'border-green-300 bg-white text-green-600 hover:bg-green-50'
                           }`}
                         >
                           {item.status === 'published' ? '下架' : '发布'}
                         </button>
                       )}
+                      <button
+                        onClick={() => handleDelete(item.id, item.title)}
+                        className="rounded-lg border border-red-300 bg-white px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50"
+                      >
+                        删除
+                      </button>
                     </div>
                   </td>
                 </tr>

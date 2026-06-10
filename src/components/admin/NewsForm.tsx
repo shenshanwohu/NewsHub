@@ -4,10 +4,12 @@ import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { createNews, updateNews } from '@/lib/actions/admin-news';
+import { uploadMedia } from '@/lib/actions/media';
 import type { NewsCategory } from '@/lib/actions/news';
 import { CategoryMultiSelect } from './CategoryMultiSelect';
 import { SEOFields } from './SEOFields';
 import { RichTextEditor } from '@/components/editor/RichTextEditor';
+import { ImagePicker } from './ImagePicker';
 
 // ──────────────────────────────────────────────
 // 类型
@@ -60,6 +62,8 @@ export function NewsForm({ categories, initialData }: NewsFormProps) {
   const [seoOgImage, setSeoOgImage] = useState(initialData?.seo_og_image ?? '');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showImagePicker, setShowImagePicker] = useState(false);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   const handleSeoChange = useCallback(
     (field: 'seoTitle' | 'seoDescription' | 'seoOgImage', value: string) => {
@@ -144,15 +148,58 @@ export function NewsForm({ categories, initialData }: NewsFormProps) {
       {/* 封面图 */}
       <div>
         <label className="block text-sm font-medium text-slate-700">
-          封面图 URL
+          封面图
         </label>
-        <input
-          type="url"
-          value={coverImageUrl}
-          onChange={(e) => setCoverImageUrl(e.target.value)}
-          placeholder="https://..."
-          className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
-        />
+        <div className="mt-1 flex items-start gap-3">
+          <div className="flex-1">
+            <input
+              type="url"
+              value={coverImageUrl}
+              onChange={(e) => setCoverImageUrl(e.target.value)}
+              placeholder="https://... 或点击右侧按钮选择图片"
+              className="block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+            />
+          </div>
+          <div className="flex shrink-0 gap-2">
+            <button
+              type="button"
+              onClick={() => setShowImagePicker(true)}
+              className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+            >
+              选择图片
+            </button>
+            <label className="cursor-pointer rounded-lg border border-brand-300 bg-white px-3 py-2 text-sm font-medium text-brand-600 hover:bg-brand-50">
+              {isUploadingImage ? '上传中...' : '上传'}
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif"
+                className="hidden"
+                disabled={isUploadingImage}
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  setIsUploadingImage(true);
+                  try {
+                    const fd = new FormData();
+                    fd.append('file', file);
+                    fd.append('bucket', 'news-covers');
+                    const result = await uploadMedia(fd);
+                    if (result.success) {
+                      setCoverImageUrl(result.data.public_url);
+                    } else {
+                      alert(result.error);
+                    }
+                  } catch {
+                    alert('上传失败');
+                  } finally {
+                    setIsUploadingImage(false);
+                    if (e.target) e.target.value = '';
+                  }
+                }}
+              />
+            </label>
+          </div>
+        </div>
         {coverImageUrl && (
           <Image
             src={coverImageUrl}
@@ -231,6 +278,14 @@ export function NewsForm({ categories, initialData }: NewsFormProps) {
           取消
         </button>
       </div>
+
+      {/* 图片选择器弹窗 */}
+      <ImagePicker
+        open={showImagePicker}
+        onClose={() => setShowImagePicker(false)}
+        onSelect={(url) => setCoverImageUrl(url)}
+        currentUrl={coverImageUrl}
+      />
     </form>
   );
 }

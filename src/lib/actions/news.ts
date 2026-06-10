@@ -63,14 +63,8 @@ export async function getPublishedNews(
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
 
-  // 获取总数
-  const { count: total } = await supabase
-    .from('news')
-    .select('*', { count: 'exact', head: true })
-    .eq('status', 'published');
-
-  // 获取新闻列表 + 关联分类
-  const { data: newsData } = await supabase
+  // 单次查询获取数据和总数，替代两次独立查询
+  const { data: newsData, count: total } = await supabase
     .from('news')
     .select(
       `
@@ -98,6 +92,7 @@ export async function getPublishedNews(
         )
       )
     `,
+      { count: 'exact' },
     )
     .eq('status', 'published')
     .order('is_featured', { ascending: false })
@@ -274,14 +269,8 @@ export async function getNewsByCategorySlug(
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
 
-  // 统计该分类下已发布新闻数
-  const { count: total } = await supabase
-    .from('news_categories')
-    .select('*', { count: 'exact', head: true })
-    .eq('category_id', categoryId);
-
-  // 查询新闻列表（通过 news_categories JOIN）
-  const { data: newsData } = await supabase
+  // 单次查询获取数据和总数
+  const { data: newsData, count: total } = await supabase
     .from('news')
     .select(
       `
@@ -305,6 +294,7 @@ export async function getNewsByCategorySlug(
         categories ( id, name, slug )
       )
     `,
+      { count: 'exact' },
     )
     .eq('status', 'published')
     .eq('news_categories.category_id', categoryId)
@@ -370,13 +360,8 @@ export async function searchNews(
   const to = from + pageSize - 1;
   const keyword = `%${query.trim()}%`;
 
-  const { count: total } = await supabase
-    .from('news')
-    .select('*', { count: 'exact', head: true })
-    .eq('status', 'published')
-    .or(`title.ilike.${keyword},content.ilike.${keyword}`);
-
-  const { data: newsData } = await supabase
+  // 单次查询获取数据和总数
+  const { data: newsData, count: total } = await supabase
     .from('news')
     .select(
       `
@@ -388,6 +373,7 @@ export async function searchNews(
         category_id, categories ( id, name, slug )
       )
     `,
+      { count: 'exact' },
     )
     .eq('status', 'published')
     .or(`title.ilike.${keyword},content.ilike.${keyword}`)
@@ -442,39 +428,27 @@ export interface DashboardStats {
 export async function getDashboardStats(): Promise<DashboardStats> {
   const supabase = await createClient();
 
-  const [totalResult, categoriesResult] = await Promise.all([
-    supabase.from('news').select('*', { count: 'exact', head: true }),
+  // 一次查询获取所有新闻的 status 和 view_count
+  // 替代原来的 7 次独立查询
+  const [newsResult, categoriesResult] = await Promise.all([
+    supabase.from('news').select('status, view_count'),
     supabase.from('categories').select('*', { count: 'exact', head: true }),
   ]);
 
-  const [pubResult, draftResult, archResult] = await Promise.all([
-    supabase
-      .from('news')
-      .select('*', { count: 'exact', head: true })
-      .eq('status', 'published'),
-    supabase
-      .from('news')
-      .select('*', { count: 'exact', head: true })
-      .eq('status', 'draft'),
-    supabase
-      .from('news')
-      .select('*', { count: 'exact', head: true })
-      .eq('status', 'archived'),
-  ]);
+  const newsData = newsResult.data ?? [];
+  const totalViews = newsData.reduce(
+    (sum: number, row: any) => sum + (row.view_count ?? 0),
+    0,
+  );
 
-  const { data: viewsData } = await supabase.from('news').select('view_count');
-
-  const totalViews =
-    viewsData?.reduce(
-      (sum: number, row: any) => sum + (row.view_count ?? 0),
-      0,
-    ) ?? 0;
+  const countByStatus = (status: string) =>
+    newsData.filter((n: any) => n.status === status).length;
 
   return {
-    totalNews: totalResult.count ?? 0,
-    publishedNews: pubResult.count ?? 0,
-    draftNews: draftResult.count ?? 0,
-    archivedNews: archResult.count ?? 0,
+    totalNews: newsData.length,
+    publishedNews: countByStatus('published'),
+    draftNews: countByStatus('draft'),
+    archivedNews: countByStatus('archived'),
     totalCategories: categoriesResult.count ?? 0,
     totalViews,
   };

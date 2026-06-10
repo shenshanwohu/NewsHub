@@ -30,14 +30,14 @@ export function NewsStatusActions({
       {currentStatus === 'published' ? (
         <button
           onClick={handleUnpublish}
-          className="rounded-lg border border-amber-300 px-4 py-2 text-sm font-medium text-amber-700 hover:bg-amber-50"
+          className="rounded-lg border border-amber-300 bg-white px-4 py-2 text-sm font-medium text-amber-700 hover:bg-amber-50"
         >
           下架
         </button>
       ) : (
         <button
           onClick={handlePublish}
-          className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
+          className="rounded-lg border border-green-300 bg-white px-4 py-2 text-sm font-medium text-green-700 hover:bg-green-50"
         >
           发布
         </button>

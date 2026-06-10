@@ -6,6 +6,9 @@ import { NewsCard } from '@/components/public/NewsCard';
 import { Pagination } from '@/components/ui/Pagination';
 import { NewsCardSkeleton } from '@/components/ui/Skeleton';
 
+// 静态增量更新间隔
+export const revalidate = 60;
+
 // ──────────────────────────────────────────────
 // SEO
 // ──────────────────────────────────────────────

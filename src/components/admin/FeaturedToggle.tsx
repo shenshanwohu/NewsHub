@@ -15,21 +15,25 @@ export function FeaturedToggle({
   onToggle,
 }: FeaturedToggleProps) {
   const handleClick = useCallback(async () => {
+    const msg = isFeatured
+      ? '确定取消置顶这篇新闻吗？'
+      : '确定将这篇新闻置顶吗？';
+    if (!confirm(msg)) return;
     try {
       const result = await toggleFeatured(newsId);
       onToggle?.(newsId, result.is_featured);
     } catch {
       // 静默失败
     }
-  }, [newsId, onToggle]);
+  }, [newsId, isFeatured, onToggle]);
 
   return (
     <button
       onClick={handleClick}
-      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium transition-colors ${
+      className={`rounded-lg border px-3 py-1.5 text-xs font-medium ${
         isFeatured
-          ? 'bg-amber-100 text-amber-700 hover:bg-amber-200'
-          : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+          ? 'border-amber-300 bg-white text-amber-600 hover:bg-amber-50'
+          : 'border-slate-300 bg-white text-slate-500 hover:bg-slate-50'
       }`}
       title={isFeatured ? '取消置顶' : '设为置顶'}
     >
