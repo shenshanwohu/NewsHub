@@ -7,6 +7,9 @@ import { CategoryBadge } from '@/components/public/CategoryBadge';
 import { RichTextRenderer } from '@/components/public/RichTextRenderer';
 import { ViewTracker } from './ViewTracker';
 
+// 增量静态再生：60 秒后重新生成
+export const revalidate = 60;
+
 // ──────────────────────────────────────────────
 // SEO Metadata — 动态生成
 // ──────────────────────────────────────────────
